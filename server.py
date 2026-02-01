@@ -13,6 +13,12 @@ try:
 except ImportError:
     raise ImportError("Please install openai: pip install openai")
 
+try:
+    from dotenv import load_dotenv
+    HAS_DOTENV = True
+except ImportError:
+    HAS_DOTENV = False
+
 # Initialize MCP server
 mcp = FastMCP("openai-integration")
 
@@ -24,12 +30,29 @@ STYLES = {"vivid", "natural"}
 GPT_MODELS = {"gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"}
 VISION_MODELS = {"gpt-4o", "gpt-4o-mini"}
 
+# Load .env file if present (checks server directory first, then current directory)
+_env_loaded = False
+if HAS_DOTENV:
+    # Check for .env in the same directory as server.py
+    server_dir = Path(__file__).parent
+    env_file = server_dir / ".env"
+    if env_file.exists():
+        load_dotenv(env_file)
+        _env_loaded = True
+    else:
+        # Fall back to current working directory
+        load_dotenv()  # Loads .env from cwd if exists
+
 
 def get_client() -> OpenAI:
-    """Get OpenAI client with API key from environment."""
+    """Get OpenAI client with API key from .env file or environment variable."""
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is not set")
+        raise ValueError(
+            "OPENAI_API_KEY not found. Set it via:\n"
+            "  1. .env file in the server directory, or\n"
+            "  2. System environment variable"
+        )
     return OpenAI(api_key=api_key)
 
 

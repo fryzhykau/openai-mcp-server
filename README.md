@@ -88,9 +88,39 @@ When adding the MCP server, you can choose different scopes:
 - `gpt-4-turbo` - Previous generation, still capable
 - `gpt-3.5-turbo` - Fastest, most economical
 
+## API Key Configuration
+
+The server looks for `OPENAI_API_KEY` in this order:
+
+1. **`.env` file** in the server directory (recommended for development)
+2. **System environment variable** (recommended for production)
+
+### Option 1: Using `.env` file
+
+Create a `.env` file in the `openai-mcp-server` directory:
+
+```bash
+cp .env.example .env
+# Edit .env and add your API key
+```
+
+### Option 2: System environment variable
+
+**Windows (PowerShell - persistent):**
+```powershell
+[Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "sk-your-key", "User")
+```
+
+**Linux/macOS:**
+```bash
+echo 'export OPENAI_API_KEY="sk-your-key"' >> ~/.bashrc
+source ~/.bashrc
+```
+
 ## Security Notes
 
-- API keys are passed via environment variables, never hardcoded
+- API keys are loaded from `.env` file or environment variables, never hardcoded
+- `.env` files are excluded from git via `.gitignore`
 - All user inputs are validated before API calls
 - File operations use resolved absolute paths
 - API errors are caught and returned as user-friendly messages
